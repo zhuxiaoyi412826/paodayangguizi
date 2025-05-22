@@ -1,0 +1,68 @@
+/* 棋盘与棋子样式 */
+body {
+    font-family: '微软雅黑', Arial, sans-serif;
+    background: #f5f5f5;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+#game-container {
+    display: inline-block;
+    margin-top: 30px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    padding: 20px;
+}
+canvas#board {
+    background: #e0c68e;
+    border: 2px solid #b58863;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto 15px auto;
+}
+#info {
+    margin: 10px 0;
+    font-size: 18px;
+    color: #333;
+    min-height: 24px;
+}
+button#restart {
+    padding: 8px 24px;
+    font-size: 16px;
+    background: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+button#restart:hover {
+    background: #388e3c;
+}
+#container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 32px;
+}
+#rules-area {
+    width: 260px;
+    background: #fffbe6;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    padding: 20px 18px;
+    margin-right: 0;
+    font-size: 16px;
+    color: #444;
+    text-align: left;
+    line-height: 1.8;
+}
+#rules-area h2 {
+    font-size: 20px;
+    color: #b58863;
+    margin-bottom: 12px;
+}
+#rules-area p {
+    margin: 0 0 10px 0;
+}
