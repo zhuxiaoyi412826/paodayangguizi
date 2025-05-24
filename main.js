@@ -28,6 +28,8 @@ let paoTurn = true;
 // 游戏是否结束
 let gameOver = false;
 
+
+
 const canvas = document.getElementById('board');
 canvas.width = 450;
 canvas.height = 450;
@@ -50,6 +52,7 @@ const chooseBingBtn = document.getElementById('choose-bing');
 
 // 新增：角色选择事件绑定
 choosePaoBtn.onclick = function () {
+    
     if (!gameParams || !gameParams.rows || !gameParams.cols || !gameParams.paoCount) {
         alert('请先选择游戏参数！');
         return;
@@ -312,23 +315,22 @@ function drawPiece(r, c, type, highlight, offsetX = (canvas.width - (config.cols
  */
 // 新增9x9参数按钮
 const param9x9Btn = document.getElementById('param-9x9');
-if (param9x9Btn) {
-    param9x9Btn.onclick = function () {
-        gameParams = { rows: 9, cols: 9, paoCount: 7 };
-        config.rows = 9;
-        config.cols = 9;
-        canvas.width = 730;
-        canvas.height = 730;
-        playerRole = null;
-        boardRotated = false;
-        roleSelectContainer.style.display = '';
-        gameContainer.style.display = 'none';
-        document.querySelector('h2').innerText = '炮打洋鬼子';
-        info.innerText = '请选择角色开始游戏';
-        drawBoard();
-    };
-}
-// 修改initGame，支持9x9和7炮
+param9x9Btn.onclick = function () {
+    gameParams = { rows: 9, cols: 9, paoCount: 7 };
+    config.rows = 9;
+    config.cols = 9;
+    config.cellSize = 80;
+    canvas.width = 730;
+    canvas.height = 730;
+    playerRole = null;
+    boardRotated = false;
+    roleSelectContainer.style.display = '';
+    gameContainer.style.display = '';
+    document.querySelector('h2').innerText = '炮打洋鬼子';
+    info.innerText = '请选择角色开始游戏';
+    drawBoard();
+    console.log('切换到9x9，参数已设置，等待选择角色');
+};
 function initGame() {
     // 初始化棋盘
     board = [];
@@ -345,6 +347,7 @@ function initGame() {
     paoTurn = (playerRole === 'pao') ? false : true;
     gameOver = false;
     if (!playerRole) {
+        console.log('initGame时playerRole为', playerRole);
         drawBoard();
         info.innerText = '请选择角色开始游戏';
         return;
@@ -373,20 +376,31 @@ function initGame() {
             }
         }
     } else if (config.rows === 9 && config.cols === 9 && gameParams.paoCount === 7) {
-        for (let c = 1; c <= 7; c++) {
-            board[0][c] = PAO;
-            paos.push({ r: 0, c });
-        }
-        for (let r = 2; r <= 8; r++) {
-            for (let c = 0; c < 9; c++) {
-                board[r][c] = BING;
-                bings.push({ r, c });
+        // 9x9模式
+        if (playerRole === 'pao' || playerRole === 'bing') {
+            // 炮方：第0行第1~7列
+            for (let c = 1; c <= 7; c++) {
+                board[0][c] = PAO;
+                paos.push({ r: 0, c });
+            }
+            // 兵方：第2~8行，0~8列
+            for (let r = 2; r <= 8; r++) {
+                for (let c = 0; c < 9; c++) {
+                    board[r][c] = BING;
+                    bings.push({ r, c });
+                }
             }
         }
+        // 调试输出棋盘状态
+        console.log('9x9初始化炮坐标:', JSON.stringify(paos));
+        console.log('9x9初始化兵坐标:', JSON.stringify(bings));
+        console.log('棋盘状态:', JSON.stringify(board));
     }
     drawBoard();
     updateInfo();
 }
+
+// 修改initGame，支持9x9和7炮
 function isValidMove(fromR, fromC, toR, toC) {
     if (gameOver) return false;
     if (toR < 0 || toR >= config.rows || toC < 0 || toC >= config.cols) return false;
@@ -494,40 +508,8 @@ function updateInfo() {
  * 处理棋盘点击事件
  * @param {MouseEvent} e 
  */
-// 修改：点击事件，支持旋转后坐标映射
-function handleBoardClick(e) {
-    if (gameOver) return;
-    const scale = 1;
-    const boardWidth = (config.cols - 1) * config.cellSize * scale;
-    const boardHeight = (config.rows - 1) * config.cellSize * scale;
-    const offsetX = (canvas.width - boardWidth) / 2;
-    const offsetY = (canvas.height - boardHeight) / 2;
-    const rect = canvas.getBoundingClientRect();
-    let x = e.clientX - rect.left;
-    let y = e.clientY - rect.top;
-    // 旋转坐标
-    if (boardRotated) {
-        x = canvas.width - x;
-        y = canvas.height - y;
-    }
-    let c = Math.round((x - offsetX) / (config.cellSize * scale));
-    let r = Math.round((y - offsetY) / (config.cellSize * scale));
-    if (r < 0 || r >= config.rows || c < 0 || c >= config.cols) return;
-    const pieceOffsetX = offsetX;
-    const pieceOffsetY = offsetY;
-    const pieceCenterX = pieceOffsetX + c * config.cellSize;
-    const pieceCenterY = pieceOffsetY + r * config.cellSize;
-    const dist = Math.sqrt(Math.pow(x - pieceCenterX, 2) + Math.pow(y - pieceCenterY, 2));
-    if (dist > config.cellSize / 3) return; // 判定半径与棋子绘制半径一致
-    handleCellClick(r, c);
-}
-
-// 绑定事件
+canvas.removeEventListener('click', handleBoardClick);
 canvas.addEventListener('click', handleBoardClick);
-restartBtn.addEventListener('click', initGame);
-
-// 初始化游戏
-initGame();
 
 /**
  * 处理棋盘格点点击事件，实现选中、移动、吃子等逻辑
@@ -590,19 +572,14 @@ function initGame() {
             }
         }
     } else if (config.rows === 9 && config.cols === 9 && gameParams.paoCount === 7) {
-        // 9x9模式
-        if (playerRole === 'pao' || playerRole === 'bing') {
-            // 炮方：第一行中间七个点
-            for (let c = 1; c <= 7; c++) {
-                board[0][c] = PAO;
-                paos.push({ r: 0, c });
-            }
-            // 兵方：第3-9行（整体下移一格）
-            for (let r = 2; r <= 8; r++) {
-                for (let c = 0; c < 9; c++) {
-                    board[r][c] = BING;
-                    bings.push({ r, c });
-                }
+        for (let c = 1; c <= 7; c++) {
+            board[0][c] = PAO;
+            paos.push({ r: 0, c });
+        }
+        for (let r = 2; r <= 8; r++) {
+            for (let c = 0; c < 9; c++) {
+                board[r][c] = BING;
+                bings.push({ r, c });
             }
         }
     }
@@ -615,6 +592,7 @@ function initGame() {
  * @param {number} c 列
  */
 function handleCellClick(r, c) {
+    console.log('handleCellClick触发', { r, c, paoTurn, playerRole, cell: board[r][c] });
     if (gameOver) return;
     // 未选中棋子，点击炮或兵选中
     if (!selected) {
@@ -692,10 +670,6 @@ function handleCellClick(r, c) {
                 checkWin();
                 updateInfo();
                 updateStats();
-                // 兵方AI或手动走棋
-                if (!gameOver && playerRole === 'pao') {
-                    setTimeout(bingAIAutoMove, 500);
-                }
                 return;
 
             }
@@ -725,10 +699,7 @@ function handleCellClick(r, c) {
                 checkWin();
                 updateInfo();
                 updateStats();
-                // 炮方AI或手动走棋
-                if (!gameOver && playerRole === 'bing') {
-                    setTimeout(paoAIAutoMove, 500);
-                }
+                // 炮方AI或手动走
                 return;
             }
         }
@@ -737,19 +708,6 @@ function handleCellClick(r, c) {
         drawBoard();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // 统计相关变量
 let gameStartTime = null; // 游戏开始时间
@@ -781,15 +739,3 @@ function updateStats() {
     let bingSec = Math.floor((bingThinkTime % 60000) / 1000);
     document.getElementById('bing-think').innerText = (bingMin < 10 ? '0' : '') + bingMin + ':' + (bingSec < 10 ? '0' : '') + bingSec;
 }
-
-
-
-
-
-
-
-
-
-
-
-

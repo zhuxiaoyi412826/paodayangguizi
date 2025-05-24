@@ -64,6 +64,76 @@
                 from { transform: translateY(20px); opacity: 0; }
                 to { transform: translateY(0); opacity: 1; }
             }
+            .board-size-selected {
+                background-color: #C62828 !important;
+                color: white !important;
+            }
+            .board-size-selected i:first-child::before {
+                content: "\f00c";
+            }
+            .leaderboard-panel {
+                position: fixed;
+                bottom: 2rem;
+                right: 2rem;
+                z-index: 50;
+                background-color: white;
+                border-radius: 1rem;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                overflow: hidden;
+                transform: translateY(30px);
+                opacity: 0;
+                transition: all 0.3s ease;
+            }
+            .leaderboard-panel.show {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            .leaderboard-header {
+                background-color: #8B4513;
+                color: white;
+                padding: 0.75rem 1rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                cursor: move;
+            }
+            .leaderboard-body {
+                padding: 1rem;
+            }
+            .leaderboard-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.5rem 0;
+                border-bottom: 1px solid #E0C68E;
+                transition: background-color 0.2s ease;
+            }
+            .leaderboard-item:last-child {
+                border-bottom: none;
+            }
+            .leaderboard-item:hover {
+                background-color: #f8f4ea;
+            }
+            .leaderboard-rank {
+                width: 1.5rem;
+                height: 1.5rem;
+                border-radius: 50%;
+                background-color: #D4AF37;
+                color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-weight: bold;
+                margin-right: 0.5rem;
+            }
+            .leaderboard-name {
+                flex-grow: 1;
+                margin-left: 0.5rem;
+            }
+            .leaderboard-score {
+                font-weight: bold;
+                color: #C62828;
+            }
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;500&display=swap" rel="stylesheet">
@@ -135,7 +205,7 @@
                             <i class="fa fa-expand mr-1 top-0 right-0"></i> 全屏
                         </button>
                     </h3>
-                </div>
+                    </div>
                     <div id="info" class="text-center text-lg font-medium text-dark min-h-[80px] flex items-center justify-center py-4 bg-amber-50 rounded-lg">
                         请选择你的角色开始游戏
                     </div>
@@ -175,13 +245,13 @@
                             </h4>
                             <div class="flex flex-wrap gap-3">
                                 <button id="param-5x5" class="flex-1 bg-secondary text-primary py-4 rounded-xl font-medium btn-game shadow-md">
-                                    <i class="fa fa-square mr-2"></i> 5×5 简易
+                                    <i class="fa fa-square-o mr-2"></i> 5×5 简易
                                 </button>
                                 <button id="param-7x7" class="flex-1 bg-secondary text-primary py-4 rounded-xl font-medium btn-game shadow-md">
-                                    <i class="fa fa-th mr-2"></i> 7×7 标准
+                                    <i class="fa fa-square-o mr-2"></i> 7×7 标准
                                 </button>
                                 <button id="param-9x9" class="flex-1 bg-secondary text-primary py-4 rounded-xl font-medium btn-game shadow-md">
-                                    <i class="fa fa-th-large mr-2"></i> 9×9 困难
+                                    <i class="fa fa-square-o mr-2"></i> 9×9 困难
                                 </button>
                             </div>
                         </div>
@@ -224,6 +294,43 @@
         </div>
     </footer>
 
+    <!-- 排行榜面板 -->
+    <div id="leaderboard" class="leaderboard-panel">
+        <div class="leaderboard-header">
+            <h3 class="font-game text-lg">高分排行榜</h3>
+            <button id="close-leaderboard" class="text-white hover:text-amber-200">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="leaderboard-body">
+            <div class="leaderboard-item">
+                <div class="leaderboard-rank">1</div>
+                <div class="leaderboard-name">红军战神</div>
+                <div class="leaderboard-score">1200</div>
+            </div>
+            <div class="leaderboard-item">
+                <div class="leaderboard-rank">2</div>
+                <div class="leaderboard-name">策略大师</div>
+                <div class="leaderboard-score">980</div>
+            </div>
+            <div class="leaderboard-item">
+                <div class="leaderboard-rank">3</div>
+                <div class="leaderboard-name">棋坛老将</div>
+                <div class="leaderboard-score">850</div>
+            </div>
+            <div class="leaderboard-item">
+                <div class="leaderboard-rank">4</div>
+                <div class="leaderboard-name">战术高手</div>
+                <div class="leaderboard-score">720</div>
+            </div>
+            <div class="leaderboard-item">
+                <div class="leaderboard-rank">5</div>
+                <div class="leaderboard-name">象棋新秀</div>
+                <div class="leaderboard-score">650</div>
+            </div>
+        </div>
+    </div>
+
     <script src="AI.js"></script>
     <script src="main.js"></script>
     <script>
@@ -232,6 +339,33 @@
             const fadeElements = document.querySelectorAll('.fade-in');
             fadeElements.forEach((el, index) => {
                 el.style.animationDelay = `${0.1 + index * 0.1}s`;
+            });
+            
+            // 棋盘大小选择逻辑
+            const boardSizeButtons = document.querySelectorAll('#param-5x5, #param-7x7, #param-9x9');
+            boardSizeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 移除所有按钮的选中状态
+                    boardSizeButtons.forEach(btn => {
+                        btn.classList.remove('board-size-selected');
+                    });
+                    // 添加当前按钮的选中状态
+                    this.classList.add('board-size-selected');
+                });
+            });
+            
+            // 显示排行榜面板
+            setTimeout(() => {
+                document.getElementById('leaderboard').classList.add('show');
+            }, 1000);
+            
+            // 关闭排行榜面板
+            document.getElementById('close-leaderboard').addEventListener('click', function() {
+                const panel = document.getElementById('leaderboard');
+                panel.classList.remove('show');
+                setTimeout(() => {
+                    panel.style.display = 'none';
+                }, 300);
             });
         });
     </script>

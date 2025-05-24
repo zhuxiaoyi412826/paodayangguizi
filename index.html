@@ -3,51 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>炮打洋鬼子</title>
+    <title>炮打洋鬼子 - 经典策略游戏</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;500&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .panel-shadow { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
+            .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        }
+    </style>
 </head>
-<body>
-    <h2>炮打洋鬼子</h2>
-    <div id="container" style="display:flex;justify-content:center;align-items:flex-start;gap:32px;margin-left:-250px">
-        <div id="rules-area">
-            <h2 style="margin-top:0;">游戏规则</h2>
-            <p><b>吃子：</b>当 “红军” 和 “鬼子” 在一条直线上，且之间只隔一个空点时，“红军” 可以把鬼子吃掉，当然 “红军” 也可放弃吃子改为行棋。“鬼子” 不能吃子。</p>
-            <p><b>胜负判定：</b>“红军” 把 “鬼子” 全部消灭则 “红军” 胜；“鬼子” 把 “红军” 全部围困使其无法行动则 “鬼子” 胜；如果双方均不能胜时则为和棋。</p>
-            <div id="game-info-area">
-                <div id="info"></div>
-                <button id="restart">重新开始</button>
+<body class="bg-gradient-to-b from-amber-50 to-amber-100 min-h-screen">
+    <header class="bg-[#8B4513] text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-chess-rook text-2xl text-[#D4AF37]"></i>
+                <h1 class="text-2xl md:text-3xl font-[\'Ma Shan Zheng\'] tracking-wider">炮打洋鬼子</h1>
             </div>
         </div>
-        <div>
-            <div id="role-select-container">
-                <div id="role-select" style="margin-bottom:16px;">
-                    <span>请选择你的角色：</span>
-                    <button id="choose-pao">炮</button>
-                    <button id="choose-bing">兵</button>
+    </header>
+    <main class="container mx-auto px-4 py-8 md:py-12">
+        <section class="text-center mb-10 fade-in">
+            <h2 class="text-[clamp(1.8rem,4vw,2.8rem)] font-[\'Ma Shan Zheng\'] text-[#8B4513] mb-3">经典策略棋类游戏</h2>
+            <p class="text-[#333]/70 max-w-2xl mx-auto text-lg">指挥红军炮队消灭敌军，体验传统与现代结合的策略对抗</p>
+        </section>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+            <div class="lg:col-span-1 space-y-6">
+                <div class="bg-white rounded-2xl p-6 panel-shadow fade-in">
+                    <h3 class="text-xl font-[\'Ma Shan Zheng\'] text-[#8B4513] mb-4 flex items-center">
+                        <i class="fa fa-book text-[#D4AF37] mr-2"></i> 游戏规则
+                    </h3>
+                    <div class="space-y-4 text-[#333]/80">
+                        <div class="p-3 bg-[#E0C68E]/10 rounded-lg">
+                            <p class="font-medium text-[#8B4513] mb-1"><i class="fa fa-bullseye mr-1"></i> 游戏目标</p>
+                            <p>红军（炮）需消灭所有敌军（兵），或使敌军无法移动以获得胜利。</p>
+                        </div>
+                        <div class="p-3 bg-[#E0C68E]/10 rounded-lg">
+                            <p class="font-medium text-[#8B4513] mb-1"><i class="fa fa-exchange mr-1"></i> 吃子规则</p>
+                            <p>当炮与兵在同一直线且中间仅隔一个空格时，炮可吃掉兵；兵无法吃子。</p>
+                        </div>
+                        <div class="p-3 bg-[#E0C68E]/10 rounded-lg">
+                            <p class="font-medium text-[#8B4513] mb-1"><i class="fa fa-trophy mr-1"></i> 胜利条件</p>
+                            <p>炮消灭所有兵或围困兵使其无法移动则炮胜，反之兵胜，均无法胜则为和棋。</p>
+                        </div>
+                    </div>
                 </div>
-                <div id="param-select" style="margin-bottom:16px;">
-                    <span>请选择游戏参数：</span>
-                    <button id="param-5x5">5行5列，3个炮</button>
-                    <button id="param-7x7">7行7列，5个炮</button>
-                    <button id="param-9x9">9行9列，7个炮</button>
+                <div class="bg-white rounded-2xl p-6 panel-shadow fade-in mt-6">
+                    <h3 class="text-xl font-[\'Ma Shan Zheng\'] text-[#8B4513] mb-4 flex items-center">
+                        <i class="fa fa-info-circle text-[#D4AF37] mr-2"></i> 游戏状态
+                    </h3>
+                    <div id="info" class="text-center text-lg font-medium text-[#333] min-h-[80px] flex items-center justify-center py-4 bg-amber-50 rounded-lg"></div>
+                    <button id="restart" class="w-full bg-[#8B4513] hover:bg-[#8B4513]/90 text-white py-3 rounded-lg font-medium mt-4 flex items-center justify-center">
+                        <i class="fa fa-refresh mr-2"></i> 重新开始
+                    </button>
+                </div>
+                <div class="bg-white rounded-2xl p-6 panel-shadow fade-in mt-6">
+                    <h3 class="text-xl font-[\'Ma Shan Zheng\'] text-[#8B4513] mb-4 flex items-center">
+                        <i class="fa fa-bar-chart text-[#D4AF37] mr-2"></i> 统计信息
+                    </h3>
+                    <div id="stats-content" class="space-y-2 text-[#333]/90">
+                        <div>游戏时间：<span id="game-time">00:00</span></div>
+                        <div>炮行走步数：<span id="pao-steps">0</span></div>
+                        <div>兵行走步数：<span id="bing-steps">0</span></div>
+                        <div>炮思考时间：<span id="pao-think">00:00</span></div>
+                        <div>兵思考时间：<span id="bing-think">00:00</span></div>
+                    </div>
                 </div>
             </div>
-            <div id="game-container" style="display:none;">
-                <canvas id="board" width="450" height="450"></canvas>
+            <div class="lg:col-span-2 space-y-6">
+                <div id="role-select-container" class="bg-white rounded-2xl p-6 panel-shadow fade-in">
+                    <h3 class="text-xl font-[\'Ma Shan Zheng\'] text-[#8B4513] mb-6 flex items-center">
+                        <i class="fa fa-cogs text-[#D4AF37] mr-2"></i> 游戏准备
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-md font-medium text-[#333] mb-3 flex items-center">
+                                <i class="fa fa-user text-[#C62828] mr-2"></i> 选择阵营
+                            </h4>
+                            <div class="flex flex-wrap gap-3">
+                                <button id="choose-pao" class="flex-1 bg-[#C62828] text-white py-4 rounded-xl font-medium shadow-lg"> <i class="fa fa-shield mr-2"></i> 红军（炮）</button>
+                                <button id="choose-bing" class="flex-1 bg-[#1565C0] text-white py-4 rounded-xl font-medium shadow-lg"> <i class="fa fa-users mr-2"></i> 敌军（兵）</button>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-md font-medium text-[#333] mb-3 flex items-center">
+                                <i class="fa fa-square-o text-[#D4AF37] mr-2"></i> 棋盘大小
+                            </h4>
+                            <div class="flex flex-wrap gap-3">
+                                <button id="param-5x5" class="flex-1 bg-[#E0C68E] text-[#8B4513] py-4 rounded-xl font-medium shadow-md board-size-btn"> <i class="fa fa-square-o mr-2" id="icon-5x5"></i> 5×5 简易</button>
+                                <button id="param-7x7" class="flex-1 bg-[#E0C68E] text-[#8B4513] py-4 rounded-xl font-medium shadow-md board-size-btn"> <i class="fa fa-square-o mr-2" id="icon-7x7"></i> 7×7 标准</button>
+                                <button id="param-9x9" class="flex-1 bg-[#E0C68E] text-[#8B4513] py-4 rounded-xl font-medium shadow-md board-size-btn"> <i class="fa fa-square-o mr-2" id="icon-9x9"></i> 9×9 困难</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="game-container" class="bg-white rounded-2xl p-4 panel-shadow hidden fade-in">
+                    <div class="flex justify-center">
+                        <canvas id="board" class="bg-[#DEB887] rounded-lg shadow-xl"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
-        <div id="stats-area" style="width:180px;background:#fffbe6;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.10);padding:10px 8px;font-size:16px;color:#444;line-height:1.8;min-height:200px;margin-right: -225px;">
-            <h2 style="margin-top:0;">统计信息</h2>
-            <div id="stats-content">
-                <div>游戏时间：<span id="game-time">00:00</span></div>
-                <div>炮行走步数：<span id="pao-steps">0</span></div>
-                <div>兵行走步数：<span id="bing-steps">0</span></div>
-                <div>炮思考时间：<span id="pao-think">00:00</span></div>
-                <div>兵思考时间：<span id="bing-think">00:00</span></div>
+    </main>
+    <footer class="bg-[#8B4513] text-white py-8 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <div class="flex flex-col md:flex-row justify-center items-center gap-6">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-sm md:text-base">© 2025 炮打洋鬼子游戏 | 传统棋类现代化</p>
+                    <p class="text-xs md:text-sm text-white/70">策略游戏 · 脑力挑战 · 经典再现</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-white hover:text-[#D4AF37] transition-colors"><i class="fa fa-github text-xl"></i></a>
+                    <a href="#" class="text-white hover:text-[#D4AF37] transition-colors"><i class="fa fa-weixin text-xl"></i></a>
+                    <a href="#" class="text-white hover:text-[#D4AF37] transition-colors"><i class="fa fa-weibo text-xl"></i></a>
+                </div>
+            </div>
+            <div class="mt-6 text-xs md:text-sm text-white/50">
+                <p>游戏设计与开发 | 传统棋类文化传承项目</p>
             </div>
         </div>
-    </div>
+    </footer>
     <script src="AI.js"></script>
     <script src="main.js"></script>
+    <script>
+    // 棋盘规格按钮互斥与高亮（修正版：只做UI高亮，点击事件交由main.js处理）
+    const boardBtns = [
+    {btn: document.getElementById('param-5x5'), icon: document.getElementById('icon-5x5'), color: '#C62828'},
+    {btn: document.getElementById('param-7x7'), icon: document.getElementById('icon-7x7'), color: '#C62828'},
+    {btn: document.getElementById('param-9x9'), icon: document.getElementById('icon-9x9'), color: '#C62828'}
+    ];
+    function updateBoardBtnActive(idx) {
+    boardBtns.forEach((item, i) => {
+    if(i === idx) {
+    item.btn.classList.remove('bg-[#E0C68E]', 'text-[#8B4513]');
+    item.btn.classList.add('bg-[#C62828]', 'text-white');
+    item.icon.classList.remove('fa-square-o');
+    item.icon.classList.add('fa-check-square');
+    item.icon.style.color = '#fff';
+    } else {
+    item.btn.classList.remove('bg-[#C62828]', 'text-white');
+    item.btn.classList.add('bg-[#E0C68E]', 'text-[#8B4513]');
+    item.icon.classList.remove('fa-check-square');
+    item.icon.classList.add('fa-square-o');
+    item.icon.style.color = '#8B4513';
+    }
+    });
+    }
+    // 默认选中5x5
+    updateBoardBtnActive(0);
+    // 只做UI高亮，点击事件交由main.js处理
+    boardBtns[0].btn.addEventListener('click', function(){ updateBoardBtnActive(0); });
+    boardBtns[1].btn.addEventListener('click', function(){ updateBoardBtnActive(1); });
+    boardBtns[2].btn.addEventListener('click', function(){ updateBoardBtnActive(2); });
+    </script>
 </body>
 </html>
