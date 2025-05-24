@@ -6,14 +6,6 @@ body {
     padding: 0;
     text-align: center;
 }
-#game-container {
-    display: inline-block;
-    margin-top: 30px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    padding: 20px;
-}
 canvas#board {
     background: #e0c68e;
     border: 2px solid #b58863;
@@ -21,11 +13,17 @@ canvas#board {
     display: block;
     margin: 0 auto 15px auto;
 }
+#game-info-area {
+    margin-top: 24px;
+    text-align: center;
+}
+
 #info {
     margin: 10px 0;
     font-size: 18px;
     color: #333;
     min-height: 24px;
+    text-align: center;
 }
 button#restart {
     padding: 8px 24px;
@@ -36,6 +34,7 @@ button#restart {
     border-radius: 5px;
     cursor: pointer;
     transition: background 0.2s;
+    margin-top: 10px;
 }
 button#restart:hover {
     background: #388e3c;
@@ -65,4 +64,22 @@ button#restart:hover {
 }
 #rules-area p {
     margin: 0 0 10px 0;
+}
+#game-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+
+canvas#board {
+    background: #e0c68e;
+    border: 2px solid #b58863;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto 15px auto;
 }

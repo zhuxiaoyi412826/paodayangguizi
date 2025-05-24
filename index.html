@@ -7,12 +7,16 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>炮打洋鬼子</h1>
-    <div id="container" style="display:flex;justify-content:center;align-items:flex-start;gap:32px;">
+    <h2>炮打洋鬼子</h2>
+    <div id="container" style="display:flex;justify-content:center;align-items:flex-start;gap:32px;margin-left:-250px">
         <div id="rules-area">
             <h2 style="margin-top:0;">游戏规则</h2>
             <p><b>吃子：</b>当 “红军” 和 “鬼子” 在一条直线上，且之间只隔一个空点时，“红军” 可以把鬼子吃掉，当然 “红军” 也可放弃吃子改为行棋。“鬼子” 不能吃子。</p>
             <p><b>胜负判定：</b>“红军” 把 “鬼子” 全部消灭则 “红军” 胜；“鬼子” 把 “红军” 全部围困使其无法行动则 “鬼子” 胜；如果双方均不能胜时则为和棋。</p>
+            <div id="game-info-area">
+                <div id="info"></div>
+                <button id="restart">重新开始</button>
+            </div>
         </div>
         <div>
             <div id="role-select-container">
@@ -21,11 +25,25 @@
                     <button id="choose-pao">炮</button>
                     <button id="choose-bing">兵</button>
                 </div>
+                <div id="param-select" style="margin-bottom:16px;">
+                    <span>请选择游戏参数：</span>
+                    <button id="param-5x5">5行5列，3个炮</button>
+                    <button id="param-7x7">7行7列，5个炮</button>
+                    <button id="param-9x9">9行9列，7个炮</button>
+                </div>
             </div>
             <div id="game-container" style="display:none;">
                 <canvas id="board" width="450" height="450"></canvas>
-                <div id="info"></div>
-                <button id="restart">重新开始</button>
+            </div>
+        </div>
+        <div id="stats-area" style="width:240px;background:#fffbe6;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.10);padding:20px 18px;font-size:16px;color:#444;line-height:1.8;min-height:200px;">
+            <h2 style="margin-top:0;">统计信息</h2>
+            <div id="stats-content">
+                <div>游戏时间：<span id="game-time">00:00</span></div>
+                <div>炮行走步数：<span id="pao-steps">0</span></div>
+                <div>兵行走步数：<span id="bing-steps">0</span></div>
+                <div>炮思考时间：<span id="pao-think">00:00</span></div>
+                <div>兵思考时间：<span id="bing-think">00:00</span></div>
             </div>
         </div>
     </div>
