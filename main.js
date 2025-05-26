@@ -1,3 +1,11 @@
+// 统计相关全局变量
+let paoSteps = 0;
+let bingSteps = 0;
+let paoThinkTime = 0;
+let bingThinkTime = 0;
+let gameStartTime = null;
+let thinkStartTime = null;
+let gameTimerInterval = null;
 /**
  * 棋盘配置
  * rows/cols: 棋盘行列数
@@ -101,7 +109,55 @@ chooseBingBtn.onclick = function () {
 window.onload = function () {
     roleSelectContainer.style.display = '';
     gameContainer.style.display = 'none';
+    info.style.display = 'none';
+    document.getElementById('stats-content').parentElement.parentElement.style.display = 'none';
     document.querySelector('h2').innerText = '炮打洋鬼子';
+    // 显示排行榜
+    var leaderboardPanel = document.getElementById('leaderboard-panel');
+    if (leaderboardPanel) leaderboardPanel.style.display = '';
+};
+
+// 新增：开始游戏按钮逻辑
+const startGameBtn = document.getElementById('start-game');
+startGameBtn.onclick = function () {
+    // 只有选择了阵营才允许开始
+    if (!playerRole) {
+        alert('请先选择阵营！');
+        return;
+    }
+    gameContainer.style.display = '';
+    info.style.display = '';
+    document.getElementById('stats-content').parentElement.parentElement.style.display = '';
+    document.getElementById('role-select-container').style.display = 'none'; // 隐藏对战模式选择区域
+    // 隐藏排行榜
+    var leaderboardPanel = document.getElementById('leaderboard-panel');
+    if (leaderboardPanel) leaderboardPanel.style.display = 'none';
+    initGame(); // 只有点击开始游戏才初始化并绘制棋盘
+    roleSelectContainer.style.display = 'none';
+};
+
+// 修改选择阵营按钮逻辑，不再直接开始游戏，只设置playerRole和高亮
+choosePaoBtn.onclick = function () {
+    if (!gameParams || !gameParams.rows || !gameParams.cols || !gameParams.paoCount) {
+        alert('请先选择游戏参数！');
+        return;
+    }
+    playerRole = 'pao';
+    boardRotated = true;
+    // 高亮按钮
+    choosePaoBtn.classList.add('bg-[#C62828]', 'text-white');
+    chooseBingBtn.classList.remove('bg-[#1565C0]', 'text-white');
+};
+chooseBingBtn.onclick = function () {
+    if (!gameParams || !gameParams.rows || !gameParams.cols || !gameParams.paoCount) {
+        alert('请先选择游戏参数！');
+        return;
+    }
+    playerRole = 'bing';
+    boardRotated = false;
+    // 高亮按钮
+    chooseBingBtn.classList.add('bg-[#1565C0]', 'text-white');
+    choosePaoBtn.classList.remove('bg-[#C62828]', 'text-white');
 };
 
 // 修改：初始化棋盘和棋子，支持旋转
@@ -240,11 +296,14 @@ restartBtn.onclick = function () {
     bingSteps = 0;
     paoThinkTime = 0;
     bingThinkTime = 0;
-    thinkStartTime = null;
+    thinkStartTime = Date.now(); // 修正：重置为当前时间，防止统计溢出
     updateStats();
     roleSelectContainer.style.display = '';
     gameContainer.style.display = 'none';
     document.querySelector('h2').innerText = '炮打洋鬼子';
+    // 重新显示排行榜
+    var leaderboardPanel = document.getElementById('leaderboard-panel');
+    if (leaderboardPanel) leaderboardPanel.style.display = '';
 };
 
 /**
@@ -325,10 +384,10 @@ param9x9Btn.onclick = function () {
     playerRole = null;
     boardRotated = false;
     roleSelectContainer.style.display = '';
-    gameContainer.style.display = '';
+    gameContainer.style.display = 'none'; // 切换9x9时隐藏游戏主界面
     document.querySelector('h2').innerText = '炮打洋鬼子';
     info.innerText = '请选择角色开始游戏';
-    drawBoard();
+    // drawBoard(); // 保持不绘制棋盘
     console.log('切换到9x9，参数已设置，等待选择角色');
 };
 function initGame() {
@@ -709,14 +768,60 @@ function handleCellClick(r, c) {
     }
 }
 
-// 统计相关变量
-let gameStartTime = null; // 游戏开始时间
-let gameTimerInterval = null; // 游戏计时器
-let paoSteps = 0;
-let bingSteps = 0;
-let paoThinkTime = 0; // 单位：毫秒
-let bingThinkTime = 0; // 单位：毫秒
-let thinkStartTime = null; // 当前思考开始时间
+// 对战模式与人机难度选择逻辑
+let gameMode = 'ai'; // ai 或 match
+let aiDifficulty = 'easy'; // easy, hard, devil
+const modeAiBtn = document.getElementById('mode-ai');
+const modeMatchBtn = document.getElementById('mode-match');
+const aiDifficultyGroup = document.getElementById('ai-difficulty-group');
+const aiEasyBtn = document.getElementById('ai-easy');
+const aiHardBtn = document.getElementById('ai-hard');
+const aiDevilBtn = document.getElementById('ai-devil');
+
+function updateModeUI() {
+  if (gameMode === 'ai') {
+    aiDifficultyGroup.style.display = '';
+    modeAiBtn.classList.add('bg-[#C62828]', 'text-white');
+    modeAiBtn.classList.remove('bg-[#E0C68E]', 'text-[#8B4513]');
+    modeMatchBtn.classList.remove('bg-[#C62828]', 'text-white');
+    modeMatchBtn.classList.add('bg-[#E0C68E]', 'text-[#8B4513]');
+  } else {
+    aiDifficultyGroup.style.display = 'none';
+    modeMatchBtn.classList.add('bg-[#C62828]', 'text-white');
+    modeMatchBtn.classList.remove('bg-[#E0C68E]', 'text-[#8B4513]');
+    modeAiBtn.classList.remove('bg-[#C62828]', 'text-white');
+    modeAiBtn.classList.add('bg-[#E0C68E]', 'text-[#8B4513]');
+  }
+  // 难度按钮高亮
+  [aiEasyBtn, aiHardBtn, aiDevilBtn].forEach(btn => btn.classList.remove('bg-[#C62828]', 'text-white'));
+  if (aiDifficulty === 'easy') aiEasyBtn.classList.add('bg-[#C62828]', 'text-white');
+  if (aiDifficulty === 'hard') aiHardBtn.classList.add('bg-[#C62828]', 'text-white');
+  if (aiDifficulty === 'devil') aiDevilBtn.classList.add('bg-[#C62828]', 'text-white');
+}
+
+modeAiBtn.onclick = function() {
+  gameMode = 'ai';
+  updateModeUI();
+};
+modeMatchBtn.onclick = function() {
+  alert('该功能尚未开发，敬请期待！');
+  // gameMode = 'match';
+  // updateModeUI();
+};
+aiEasyBtn.onclick = function() {
+  aiDifficulty = 'easy';
+  updateModeUI();
+};
+aiHardBtn.onclick = function() {
+  aiDifficulty = 'hard';
+  updateModeUI();
+};
+aiDevilBtn.onclick = function() {
+  aiDifficulty = 'devil';
+  updateModeUI();
+};
+
+updateModeUI();
 
 /**
  * 刷新右侧统计信息显示

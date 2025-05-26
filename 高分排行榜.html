@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>炮打洋鬼子 - 经典策略游戏</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B4513',      // 主色调 - 深棕色
+                        secondary: '#E0C68E',    // 辅助色 - 棕黄色
+                        accent: '#D4AF37',       // 强调色 - 金色
+                        pao: '#C62828',          // 炮方颜色 - 深红色
+                        bing: '#1565C0',         // 兵方颜色 - 深蓝色
+                        board: '#DEB887',        // 棋盘颜色 - 棕褐色
+                    },
+                    fontFamily: {
+                        game: ['"Ma Shan Zheng"', '"Noto Serif SC"', 'serif'],
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .board-grid {
+                background-image: linear-gradient(#8B4513 1px, transparent 1px),
+                                  linear-gradient(90deg, #8B4513 1px, transparent 1px);
+            }
+            .piece-pao {
+                background: radial-gradient(circle at 30% 30%, #FF5252, #C62828);
+            }
+            .piece-bing {
+                background: radial-gradient(circle at 30% 30%, #42A5F5, #1565C0);
+            }
+            .btn-game {
+                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .btn-game:active {
+                transform: scale(0.95);
+            }
+            .panel-shadow {
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }
+            .fade-in {
+                animation: fadeIn 0.5s ease-out forwards;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(15px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .slide-up {
+                animation: slideUp 0.4s ease-out forwards;
+            }
+            @keyframes slideUp {
+                from { transform: translateY(20px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+            .board-size-selected {
+                background-color: #C62828 !important;
+                color: white !important;
+            }
+            .board-size-selected i:first-child::before {
+                content: "\f00c";
+            }
+            .leaderboard-panel {
+                position: fixed;
+                bottom: 2rem;
+                right: 2rem;
+                z-index: 50;
+                background-color: white;
+                border-radius: 1rem;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                overflow: hidden;
+                transform: translateY(30px);
+                opacity: 0;
+                transition: all 0.3s ease;
+            }
+            .leaderboard-panel.show {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            .leaderboard-header {
+                background-color: #8B4513;
+                color: white;
+                padding: 0.75rem 1rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                cursor: move;
+            }
+            .leaderboard-body {
+                padding: 1rem;
+            }
+            .leaderboard-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.5rem 0;
+                border-bottom: 1px solid #E0C68E;
+                transition: background-color 0.2s ease;
+            }
+            .leaderboard-item:last-child {
+                border-bottom: none;
+            }
+            .leaderboard-item:hover {
+                background-color: #f8f4ea;
+            }
+            .leaderboard-rank {
+                width: 1.5rem;
+                height: 1.5rem;
+                border-radius: 50%;
+                background-color: #D4AF37;
+                color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-weight: bold;
+                margin-right: 0.5rem;
+            }
+            .leaderboard-name {
+                flex-grow: 1;
+                margin-left: 0.5rem;
+            }
+            .leaderboard-score {
+                font-weight: bold;
+                color: #C62828;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-b from-amber-50 to-amber-100 min-h-screen">
+    <!-- 排行榜面板 -->
+    <div id="leaderboard" class="leaderboard-panel">
+        <div class="leaderboard-header">
+            <h3 class="font-game text-lg">高分排行榜</h3>
+            <button id="close-leaderboard" class="text-white hover:text-amber-200">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="leaderboard-body">
+            <div class="leaderboard-item">
+                <div class="leaderboard-rank">1</div>
+                <div class="leaderboard-name">红军战神</div>
+                <div class="leaderboard-score">1200</div>
+            </div>
+            <div class="leaderboard-item">
+                <div class="leaderboard-rank">2</div>
+                <div class="leaderboard-name">策略大师</div>
+                <div class="leaderboard-score">980</div>
+            </div>
+            <div class="leaderboard-item">
+                <div class="leaderboard-rank">3</div>
+                <div class="leaderboard-name">棋坛老将</div>
+                <div class="leaderboard-score">850</div>
+            </div>
+            <div class="leaderboard-item">
+                <div class="leaderboard-rank">4</div>
+                <div class="leaderboard-name">战术高手</div>
+                <div class="leaderboard-score">720</div>
+            </div>
+            <div class="leaderboard-item">
+                <div class="leaderboard-rank">5</div>
+                <div class="leaderboard-name">象棋新秀</div>
+                <div class="leaderboard-score">650</div>
+            </div>
+        </div>
+    </div>
+
+    <script>          
+            // 棋盘大小选择逻辑
+            const boardSizeButtons = document.querySelectorAll('#param-5x5, #param-7x7, #param-9x9');
+            boardSizeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 移除所有按钮的选中状态
+                    boardSizeButtons.forEach(btn => {
+                        btn.classList.remove('board-size-selected');
+                    });
+                    // 添加当前按钮的选中状态
+                    this.classList.add('board-size-selected');
+                });
+            });
+            
+            // 显示排行榜面板
+            setTimeout(() => {
+                document.getElementById('leaderboard').classList.add('show');
+            }, 1000);
+            
+            // 关闭排行榜面板
+            document.getElementById('close-leaderboard').addEventListener('click', function() {
+                const panel = document.getElementById('leaderboard');
+                panel.classList.remove('show');
+                setTimeout(() => {
+                    panel.style.display = 'none';
+                }, 300);
+            });
+    </script>
+</body>
+</html>
