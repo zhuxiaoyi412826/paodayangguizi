@@ -59,29 +59,18 @@ const choosePaoBtn = document.getElementById('choose-pao');
 const chooseBingBtn = document.getElementById('choose-bing');
 
 // 新增：角色选择事件绑定
+// 只设置角色和高亮，不做初始化
 choosePaoBtn.onclick = function () {
-    
     if (!gameParams || !gameParams.rows || !gameParams.cols || !gameParams.paoCount) {
         alert('请先选择游戏参数！');
         return;
     }
     playerRole = 'pao';
     boardRotated = true;
-    // 统计初始化
-    gameStartTime = Date.now();
-    paoSteps = 0;
-    bingSteps = 0;
-    paoThinkTime = 0;
-    bingThinkTime = 0;
-    thinkStartTime = Date.now();
-    if (gameTimerInterval) clearInterval(gameTimerInterval);
-    gameTimerInterval = setInterval(updateStats, 1000);
-    updateStats();
-    initGame();
-    roleSelectContainer.style.display = 'none';
-    gameContainer.style.display = '';
-    document.querySelector('h2').innerText = '炮打洋鬼子';
+    choosePaoBtn.classList.add('bg-[#C62828]', 'text-white');
+    chooseBingBtn.classList.remove('bg-[#1565C0]', 'text-white');
 };
+// 只设置角色和高亮，不做初始化
 chooseBingBtn.onclick = function () {
     if (!gameParams || !gameParams.rows || !gameParams.cols || !gameParams.paoCount) {
         alert('请先选择游戏参数！');
@@ -89,20 +78,8 @@ chooseBingBtn.onclick = function () {
     }
     playerRole = 'bing';
     boardRotated = false;
-    // 统计初始化
-    gameStartTime = Date.now();
-    paoSteps = 0;
-    bingSteps = 0;
-    paoThinkTime = 0;
-    bingThinkTime = 0;
-    thinkStartTime = Date.now();
-    if (gameTimerInterval) clearInterval(gameTimerInterval);
-    gameTimerInterval = setInterval(updateStats, 1000);
-    updateStats();
-    initGame();
-    roleSelectContainer.style.display = 'none';
-    gameContainer.style.display = '';
-    document.querySelector('h2').innerText = '炮打洋鬼子';
+    chooseBingBtn.classList.add('bg-[#1565C0]', 'text-white');
+    choosePaoBtn.classList.remove('bg-[#C62828]', 'text-white');
 };
 
 // 修改：初始化时隐藏游戏区，显示角色选择
@@ -119,12 +96,23 @@ window.onload = function () {
 
 // 新增：开始游戏按钮逻辑
 const startGameBtn = document.getElementById('start-game');
+// 统一初始化流程，确保AI自动走棋逻辑正确
 startGameBtn.onclick = function () {
     // 只有选择了阵营才允许开始
     if (!playerRole) {
         alert('请先选择阵营！');
         return;
     }
+    // 统计初始化
+    gameStartTime = Date.now();
+    paoSteps = 0;
+    bingSteps = 0;
+    paoThinkTime = 0;
+    bingThinkTime = 0;
+    thinkStartTime = Date.now();
+    if (gameTimerInterval) clearInterval(gameTimerInterval);
+    gameTimerInterval = setInterval(updateStats, 1000);
+    updateStats();
     gameContainer.style.display = '';
     info.style.display = '';
     document.getElementById('stats-content').parentElement.parentElement.style.display = '';
@@ -390,74 +378,7 @@ param9x9Btn.onclick = function () {
     // drawBoard(); // 保持不绘制棋盘
     console.log('切换到9x9，参数已设置，等待选择角色');
 };
-function initGame() {
-    // 初始化棋盘
-    board = [];
-    for (let r = 0; r < config.rows; r++) {
-        board[r] = [];
-        for (let c = 0; c < config.cols; c++) {
-            board[r][c] = EMPTY;
-        }
-    }
-    paos = [];
-    bings = [];
-    selected = null;
-    // 兵方先手
-    paoTurn = (playerRole === 'pao') ? false : true;
-    gameOver = false;
-    if (!playerRole) {
-        console.log('initGame时playerRole为', playerRole);
-        drawBoard();
-        info.innerText = '请选择角色开始游戏';
-        return;
-    }
-    // 5x5
-    if (config.rows === 5 && config.cols === 5 && gameParams.paoCount === 3) {
-        for (let c = 1; c <= 3; c++) {
-            board[0][c] = PAO;
-            paos.push({ r: 0, c });
-        }
-        for (let r = 2; r <= 4; r++) {
-            for (let c = 0; c < 5; c++) {
-                board[r][c] = BING;
-                bings.push({ r, c });
-            }
-        }
-    } else if (config.rows === 7 && config.cols === 7 && gameParams.paoCount === 5) {
-        for (let c = 1; c <= 5; c++) {
-            board[0][c] = PAO;
-            paos.push({ r: 0, c });
-        }
-        for (let r = 2; r <= 6; r++) {
-            for (let c = 0; c < 7; c++) {
-                board[r][c] = BING;
-                bings.push({ r, c });
-            }
-        }
-    } else if (config.rows === 9 && config.cols === 9 && gameParams.paoCount === 7) {
-        // 9x9模式
-        if (playerRole === 'pao' || playerRole === 'bing') {
-            // 炮方：第0行第1~7列
-            for (let c = 1; c <= 7; c++) {
-                board[0][c] = PAO;
-                paos.push({ r: 0, c });
-            }
-            // 兵方：第2~8行，0~8列
-            for (let r = 2; r <= 8; r++) {
-                for (let c = 0; c < 9; c++) {
-                    board[r][c] = BING;
-                    bings.push({ r, c });
-                }
-            }
-        }
-        // 调试输出棋盘状态
-        console.log('9x9初始化炮坐标:', JSON.stringify(paos));
-        console.log('9x9初始化兵坐标:', JSON.stringify(bings));
-        console.log('棋盘状态:', JSON.stringify(board));
-    }
-    drawBoard();
-    updateInfo();
-}
+
 
 // 修改initGame，支持9x9和7炮
 function isValidMove(fromR, fromC, toR, toC) {
@@ -630,6 +551,7 @@ function initGame() {
                 }
             }
         }
+        // 9x9模式
     } else if (config.rows === 9 && config.cols === 9 && gameParams.paoCount === 7) {
         for (let c = 1; c <= 7; c++) {
             board[0][c] = PAO;
@@ -644,6 +566,8 @@ function initGame() {
     }
     drawBoard();
     updateInfo();
+    // 玩家选择炮且兵方先手时自动触发AI走棋
+
 }
 /**
  * 处理棋盘格点点击事件
@@ -671,8 +595,16 @@ function handleCellClick(r, c) {
         }
         // 炮方操作
         if (paoTurn && board[selected.r][selected.c] === PAO) {
+
+            // 兵方AI自动走棋
+            if (!gameOver && playerRole === 'pao') {
+                console.log('兵方AI自动走棋');
+                setTimeout(bingAIAutoMove, 500);
+            }
+
             // 移动
             if (isValidMove(selected.r, selected.c, r, c)) {
+
                 // 统计步数和思考时间
                 paoSteps++;
                 let now = Date.now();
@@ -694,10 +626,7 @@ function handleCellClick(r, c) {
                 checkWin();
                 updateInfo();
                 updateStats();
-                // 兵方AI或手动走棋
-                if (!gameOver && playerRole === 'pao') {
-                    setTimeout(bingAIAutoMove, 500);
-                }
+     
                 return;
             }
             // 吃子
@@ -758,7 +687,10 @@ function handleCellClick(r, c) {
                 checkWin();
                 updateInfo();
                 updateStats();
-                // 炮方AI或手动走
+                // 炮方AI自动走棋
+                if (!gameOver && playerRole === 'bing') {
+                    setTimeout(paoAIAutoMove, 500);
+                }
                 return;
             }
         }
@@ -769,7 +701,8 @@ function handleCellClick(r, c) {
 }
 
 // 对战模式与人机难度选择逻辑
-let gameMode = 'ai'; // ai 或 match
+const modeRoomBtn = document.getElementById('mode-room');
+let gameMode = 'ai'; // ai、match、room
 let aiDifficulty = 'easy'; // easy, hard, devil
 const modeAiBtn = document.getElementById('mode-ai');
 const modeMatchBtn = document.getElementById('mode-match');
@@ -778,53 +711,147 @@ const aiEasyBtn = document.getElementById('ai-easy');
 const aiHardBtn = document.getElementById('ai-hard');
 const aiDevilBtn = document.getElementById('ai-devil');
 
+// 游戏模式和AI难度
 function updateModeUI() {
-  if (gameMode === 'ai') {
-    aiDifficultyGroup.style.display = '';
-    modeAiBtn.classList.add('bg-[#C62828]', 'text-white');
-    modeAiBtn.classList.remove('bg-[#E0C68E]', 'text-[#8B4513]');
-    modeMatchBtn.classList.remove('bg-[#C62828]', 'text-white');
-    modeMatchBtn.classList.add('bg-[#E0C68E]', 'text-[#8B4513]');
-  } else {
-    aiDifficultyGroup.style.display = 'none';
-    modeMatchBtn.classList.add('bg-[#C62828]', 'text-white');
-    modeMatchBtn.classList.remove('bg-[#E0C68E]', 'text-[#8B4513]');
-    modeAiBtn.classList.remove('bg-[#C62828]', 'text-white');
-    modeAiBtn.classList.add('bg-[#E0C68E]', 'text-[#8B4513]');
-  }
-  // 难度按钮高亮
-  [aiEasyBtn, aiHardBtn, aiDevilBtn].forEach(btn => btn.classList.remove('bg-[#C62828]', 'text-white'));
-  if (aiDifficulty === 'easy') aiEasyBtn.classList.add('bg-[#C62828]', 'text-white');
-  if (aiDifficulty === 'hard') aiHardBtn.classList.add('bg-[#C62828]', 'text-white');
-  if (aiDifficulty === 'devil') aiDevilBtn.classList.add('bg-[#C62828]', 'text-white');
+    if (gameMode === 'ai') {
+        aiDifficultyGroup.style.display = '';
+        modeAiBtn.classList.add('bg-[#C62828]', 'text-white');
+        modeAiBtn.classList.remove('bg-[#E0C68E]', 'text-[#8B4513]');
+        modeMatchBtn.classList.remove('bg-[#C62828]', 'text-white');
+        modeMatchBtn.classList.add('bg-[#E0C68E]', 'text-[#8B4513]');
+        modeRoomBtn.classList.remove('bg-[#C62828]', 'text-white');
+        modeRoomBtn.classList.add('bg-[#E0C68E]', 'text-[#8B4513]');
+    } else if (gameMode === 'match') {
+        aiDifficultyGroup.style.display = 'none';
+        modeMatchBtn.classList.add('bg-[#C62828]', 'text-white');
+        modeMatchBtn.classList.remove('bg-[#E0C68E]', 'text-[#8B4513]');
+        modeAiBtn.classList.remove('bg-[#C62828]', 'text-white');
+        modeAiBtn.classList.add('bg-[#E0C68E]', 'text-[#8B4513]');
+        modeRoomBtn.classList.remove('bg-[#C62828]', 'text-white');
+        modeRoomBtn.classList.add('bg-[#E0C68E]', 'text-[#8B4513]');
+    } else if (gameMode === 'room') {
+        aiDifficultyGroup.style.display = 'none';
+        modeRoomBtn.classList.add('bg-[#C62828]', 'text-white');
+        modeRoomBtn.classList.remove('bg-[#E0C68E]', 'text-[#8B4513]');
+        modeAiBtn.classList.remove('bg-[#C62828]', 'text-white');
+        modeAiBtn.classList.add('bg-[#E0C68E]', 'text-[#8B4513]');
+        modeMatchBtn.classList.remove('bg-[#C62828]', 'text-white');
+        modeMatchBtn.classList.add('bg-[#E0C68E]', 'text-[#8B4513]');
+    }
+    // 难度按钮高亮
+    [aiEasyBtn, aiHardBtn, aiDevilBtn].forEach(btn => btn.classList.remove('bg-[#C62828]', 'text-white'));
+    if (aiDifficulty === 'easy') aiEasyBtn.classList.add('bg-[#C62828]', 'text-white');
+    if (aiDifficulty === 'hard') aiHardBtn.classList.add('bg-[#C62828]', 'text-white');
+    if (aiDifficulty === 'devil') aiDevilBtn.classList.add('bg-[#C62828]', 'text-white');
 }
 
-modeAiBtn.onclick = function() {
-  gameMode = 'ai';
-  updateModeUI();
+modeAiBtn.onclick = function () {
+    gameMode = 'ai';
+    updateModeUI();
 };
-modeMatchBtn.onclick = function() {
-  alert('该功能尚未开发，敬请期待！');
-  // gameMode = 'match';
-  // updateModeUI();
+modeMatchBtn.onclick = function () {
+    alert('该功能尚未开发，敬请期待！');
 };
-aiEasyBtn.onclick = function() {
-  aiDifficulty = 'easy';
-  updateModeUI();
+modeRoomBtn.onclick = function () {
+    gameMode = 'room';
+    updateModeUI();
 };
-aiHardBtn.onclick = function() {
-  aiDifficulty = 'hard';
-  updateModeUI();
+aiEasyBtn.onclick = function () {
+    aiDifficulty = 'easy';
+    updateModeUI();
 };
-aiDevilBtn.onclick = function() {
-  aiDifficulty = 'devil';
-  updateModeUI();
+aiHardBtn.onclick = function () {
+    aiDifficulty = 'hard';
+    updateModeUI();
+};
+aiDevilBtn.onclick = function () {
+    aiDifficulty = 'devil';
+    updateModeUI();
 };
 
 updateModeUI();
 
+// 兵方AI自动走棋
+function bingAIAutoMove() {
+
+    console.log('bingAIAutoMove触发');
+    if (gameOver) return;
+    if (gameMode !== 'ai') return;
+    if (typeof window.bingAIMove !== 'function') return;
+    let move = window.bingAIMove(board, bings, config);
+    if (!move) return;
+    let { from, to } = move;
+    // 统计步数和思考时间
+    bingSteps++;
+    let now = Date.now();
+    bingThinkTime += (now - thinkStartTime);
+    thinkStartTime = now;
+    updateStats();
+    board[from.r][from.c] = EMPTY;
+    board[to.r][to.c] = BING;
+    for (let i = 0; i < bings.length; i++) {
+        if (bings[i].r === from.r && bings[i].c === from.c) {
+            bings[i] = { r: to.r, c: to.c };
+            break;
+        }
+    }
+    selected = null;
+    paoTurn = true;
+    thinkStartTime = Date.now();
+    drawBoard();
+    checkWin();
+    updateInfo();
+    updateStats();
+}
+window.bingAIAutoMove = bingAIAutoMove;
+// 炮方AI自动走棋
+function paoAIAutoMove() {
+    console.log('paoAIAutoMove触发');
+    if (gameOver) return;
+    if (gameMode !== 'ai') return;
+    if (typeof window.paoAIMove !== 'function') return;
+    let move = window.paoAIMove(board, paos, bings, config);
+    if (!move) return;
+    let { from, to } = move;
+    // 判断是否吃子
+    let isEat = Math.abs(from.r - to.r) === 2 || Math.abs(from.c - to.c) === 2;
+    // 统计步数和思考时间
+    paoSteps++;
+    let now = Date.now();
+    paoThinkTime += (now - thinkStartTime);
+    thinkStartTime = now;
+    updateStats();
+    board[from.r][from.c] = EMPTY;
+    board[to.r][to.c] = PAO;
+    for (let i = 0; i < paos.length; i++) {
+        if (paos[i].r === from.r && paos[i].c === from.c) {
+            paos[i] = { r: to.r, c: to.c };
+            break;
+        }
+    }
+    if (isEat) {
+        // 找到被吃的兵
+        let eatR = (from.r + to.r) / 2, eatC = (from.c + to.c) / 2;
+        for (let i = 0; i < bings.length; i++) {
+            if (bings[i].r === eatR && bings[i].c === eatC) {
+                bings.splice(i, 1);
+                break;
+            }
+        }
+    }
+    selected = null;
+    paoTurn = false;
+    thinkStartTime = Date.now();
+    drawBoard();
+    checkWin();
+    updateInfo();
+    updateStats();
+}
+window.paoAIAutoMove = paoAIAutoMove;
+
+
 /**
- * 刷新右侧统计信息显示
+ * 刷新统计信息显示
  */
 function updateStats() {
     // 游戏总时长
